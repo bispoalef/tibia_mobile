@@ -5,7 +5,7 @@ import 'package:tibia_mobile/interface/tibia_ui.dart'; // Importamos a interface
 import 'package:tibia_mobile/player/hero_player.dart';
 
 class GamePage extends StatelessWidget {
-  const GamePage({Key? key}) : super(key: key);
+  const GamePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,13 @@ class GamePage extends StatelessWidget {
               showCollisionArea: true,
               backgroundColor: const Color(0xFF222222),
               playerControllers: [
-                Joystick(directional: JoystickDirectional(color: Colors.white)),
+                Joystick(
+                  directional: JoystickDirectional(
+                    color: Colors.white,
+                    isFixed: false,
+                    size: 100,
+                  ),
+                ),
               ],
               player: HeroPlayer(
                 position: Vector2(kTileSize * 4, kTileSize * 4),

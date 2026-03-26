@@ -8,7 +8,6 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision {
   JoystickMoveDirectional _movingDirection = JoystickMoveDirectional.IDLE;
 
   double baseSpeed = 50.0;
-
   double speedBonus = 0.0;
 
   HeroPlayer({required Vector2 position})
@@ -39,10 +38,11 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision {
   void onBlockedMovement(PositionComponent other, CollisionData collisionData) {
     if (_targetPosition != null) {
       _targetPosition = null;
-      // Removi o stopMove() daqui!
-      // Ao não parar o movimento, o Bonfire continua executando a última animação de 'run'.
+      // É CRÍTICO chamar o stopMove() aqui para zerar a velocidade do Bonfire
+      // Isso evita que o personagem tente "deslizar" pela borda.
+      stopMove();
 
-      // Snap para o grid para evitar bugs de colisão
+      // Snap para o grid
       position = Vector2(
         (position.x / kTileSize).round() * kTileSize,
         (position.y / kTileSize).round() * kTileSize,
@@ -64,11 +64,14 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision {
       _checkNewMove();
     }
 
-    // NOVIDADE: Se o joystick estiver pressionado mas não tivermos alvo (bloqueado),
-    // forçamos a animação de "run" correspondente à direção do joystick.
-    if (_targetPosition == null &&
-        _joystickDirection != JoystickMoveDirectional.IDLE) {
-      _forceAnimationWhileBlocked();
+    // Gerenciamento de animação quando parado ou bloqueado
+    if (_joystickDirection != JoystickMoveDirectional.IDLE) {
+      if (_targetPosition == null) {
+        _forceAnimationWhileBlocked();
+      }
+    } else if (_targetPosition == null) {
+      // Se soltou o joystick e não tem alvo, garante que pare de vez
+      stopMove();
     }
 
     super.update(dt);
@@ -79,33 +82,46 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision {
       _movingDirection = _joystickDirection;
       _targetPosition = _calculateTargetTile(_joystickDirection);
     } else {
-      stopMove();
+      // Se não houver direção no joystick e nenhum alvo, paramos a animação.
+      if (_targetPosition == null) {
+        stopMove();
+      }
     }
   }
 
   Vector2 _calculateTargetTile(JoystickMoveDirectional dir) {
     Vector2 target = position.clone();
-
-    if (dir == JoystickMoveDirectional.MOVE_UP) {
-      target.y -= kTileSize;
-    } else if (dir == JoystickMoveDirectional.MOVE_DOWN) {
-      target.y += kTileSize;
-    } else if (dir == JoystickMoveDirectional.MOVE_LEFT) {
-      target.x -= kTileSize;
-    } else if (dir == JoystickMoveDirectional.MOVE_RIGHT) {
-      target.x += kTileSize;
-    } else if (dir == JoystickMoveDirectional.MOVE_UP_LEFT) {
-      target.y -= kTileSize;
-      target.x -= kTileSize;
-    } else if (dir == JoystickMoveDirectional.MOVE_UP_RIGHT) {
-      target.y -= kTileSize;
-      target.x += kTileSize;
-    } else if (dir == JoystickMoveDirectional.MOVE_DOWN_LEFT) {
-      target.y += kTileSize;
-      target.x -= kTileSize;
-    } else if (dir == JoystickMoveDirectional.MOVE_DOWN_RIGHT) {
-      target.y += kTileSize;
-      target.x += kTileSize;
+    switch (dir) {
+      case JoystickMoveDirectional.MOVE_UP:
+        target.y -= kTileSize;
+        break;
+      case JoystickMoveDirectional.MOVE_DOWN:
+        target.y += kTileSize;
+        break;
+      case JoystickMoveDirectional.MOVE_LEFT:
+        target.x -= kTileSize;
+        break;
+      case JoystickMoveDirectional.MOVE_RIGHT:
+        target.x += kTileSize;
+        break;
+      case JoystickMoveDirectional.MOVE_UP_LEFT:
+        target.y -= kTileSize;
+        target.x -= kTileSize;
+        break;
+      case JoystickMoveDirectional.MOVE_UP_RIGHT:
+        target.y -= kTileSize;
+        target.x += kTileSize;
+        break;
+      case JoystickMoveDirectional.MOVE_DOWN_LEFT:
+        target.y += kTileSize;
+        target.x -= kTileSize;
+        break;
+      case JoystickMoveDirectional.MOVE_DOWN_RIGHT:
+        target.y += kTileSize;
+        target.x += kTileSize;
+        break;
+      default:
+        break;
     }
     return target;
   }
@@ -117,14 +133,16 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision {
     if (distanceToTarget <= stepDistance) {
       position = _targetPosition!;
       _targetPosition = null;
-      stopMove();
+      // Só chamamos o stopMove() se o joystick também estiver parado
+      if (_joystickDirection == JoystickMoveDirectional.IDLE) {
+        stopMove();
+      }
     } else {
       _movePlayerByDirection(_movingDirection);
     }
   }
 
   void _movePlayerByDirection(JoystickMoveDirectional dir) {
-    // Usa os métodos nativos do Bonfire para aplicar velocidade
     switch (dir) {
       case JoystickMoveDirectional.MOVE_UP:
         moveUp(speed: speed);
@@ -156,7 +174,7 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision {
   }
 
   void _forceAnimationWhileBlocked() {
-    // Esse método garante que o boneco continue "andando no lugar" contra a parede
+    // idle() ou play() baseado na direção para garantir que não deslize
     switch (_joystickDirection) {
       case JoystickMoveDirectional.MOVE_UP:
         animation?.play(SimpleAnimationEnum.runUp);

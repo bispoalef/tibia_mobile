@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TibiaUI extends StatelessWidget {
-  const TibiaUI({Key? key}) : super(key: key);
+  const TibiaUI({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,24 +36,20 @@ class TibiaUI extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildSlot(image: 'leather_helmet.png'), // Exemplo
+                    _buildSlot(), // Exemplo
                   ],
                 ),
                 const SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildSlot(image: 'short_sword.png'),
-                    _buildSlot(image: 'leather_armor.png'),
-                    _buildSlot(image: 'wooden_shield.png'),
-                  ],
+                  children: [_buildSlot(), _buildSlot(), _buildSlot()],
                 ),
                 const SizedBox(height: 4),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     _buildSlot(), // Anel (Vazio)
-                    _buildSlot(image: 'leather_legs.png'),
+                    _buildSlot(),
                     _buildSlot(), // Ammo (Vazio)
                   ],
                 ),
