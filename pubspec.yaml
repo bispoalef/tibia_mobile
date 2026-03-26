@@ -28,3 +28,6 @@ flutter:
     - assets/images/
     - assets/images/player/
     - assets/images/map/
+    - assets/images/enemies/rat/
+    - assets/images/enemies/cyclops/
+    - assets/images/enemies/troll/

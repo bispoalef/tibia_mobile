@@ -1,0 +1,61 @@
+import 'dart:ui' as ui;
+import 'package:bonfire/bonfire.dart';
+
+class CyclopsSprite {
+  static String path = 'enemies/cyclops/cyclops';
+
+  static Future<SimpleDirectionAnimation> get animation async {
+    return SimpleDirectionAnimation(
+      // IDLE
+      idleUp: _getAnimation('up', [1]),
+      idleRight: _getAnimation('right', [1]),
+      idleDown: _getAnimation('down', [1]),
+      idleLeft: _getAnimation('left', [1]),
+
+      // RUN
+      runUp: _getAnimation('up', [0, 1, 2, 1]),
+      runRight: _getAnimation('right', [0, 1, 2, 1]),
+      runDown: _getAnimation('down', [0, 1, 2, 1]),
+      runLeft: _getAnimation('left', [0, 1, 2, 1]),
+    );
+  }
+
+  static Future<SpriteAnimation> _getAnimation(
+    String direction,
+    List<int> frames,
+  ) async {
+    List<Sprite> sprites = [];
+
+    for (int f in frames) {
+      // MÁGICA: Monta os 4 pedaços (64x64) em um único Sprite
+      final sprite = await _composeFrame(direction, f);
+      sprites.add(sprite);
+    }
+
+    return SpriteAnimation.spriteList(sprites, stepTime: 0.15);
+  }
+
+  static Future<Sprite> _composeFrame(String direction, int frame) async {
+    // 1. Carrega as 4 imagens de 32x32
+    final img1 = await Flame.images.load('${path}_$direction${frame}_1.png');
+    final img2 = await Flame.images.load('${path}_$direction${frame}_2.png');
+    final img3 = await Flame.images.load('${path}_$direction${frame}_3.png');
+    final img4 = await Flame.images.load('${path}_$direction${frame}_4.png');
+
+    // 2. Cria um "Canvas" de 64x64 para desenhar as peças
+    final recorder = ui.PictureRecorder();
+    final canvas = ui.Canvas(recorder);
+
+    // Desenha na ordem da Regra 3: Top-Left, Top-Right, Bottom-Left, Bottom-Right
+    canvas.drawImage(img1, ui.Offset(0, 0), ui.Paint());
+    canvas.drawImage(img2, ui.Offset(32, 0), ui.Paint());
+    canvas.drawImage(img3, ui.Offset(0, 32), ui.Paint());
+    canvas.drawImage(img4, ui.Offset(32, 32), ui.Paint());
+
+    // 3. Converte o desenho de volta para uma imagem única
+    final picture = recorder.endRecording();
+    final combinedImage = await picture.toImage(64, 64);
+
+    return Sprite(combinedImage);
+  }
+}

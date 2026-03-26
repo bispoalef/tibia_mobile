@@ -1,7 +1,10 @@
 import 'package:bonfire/bonfire.dart';
 import 'package:flutter/material.dart';
 import 'package:tibia_mobile/core/constants.dart';
-import 'package:tibia_mobile/interface/tibia_ui.dart'; // Importamos a interface!
+import 'enemies/troll/troll_enemy.dart';
+import 'enemies/rat/rat_enemy.dart';
+import 'enemies/cyclops/cyclops_enemy.dart';
+import 'interface/tibia_ui.dart';
 import 'package:tibia_mobile/player/hero_player.dart';
 
 class GamePage extends StatelessWidget {
@@ -20,11 +23,14 @@ class GamePage extends StatelessWidget {
               backgroundColor: const Color(0xFF222222),
               playerControllers: [
                 Joystick(
-                  directional: JoystickDirectional(
-                    color: Colors.white,
-                    isFixed: false,
-                    size: 100,
-                  ),
+                  directional: JoystickDirectional(),
+                  actions: [
+                    JoystickAction(
+                      actionId: 1, // ID do botão de ataque
+                      margin: const EdgeInsets.all(40),
+                      color: Colors.red.withOpacity(0.5),
+                    ),
+                  ],
                 ),
               ],
               player: HeroPlayer(
@@ -34,7 +40,18 @@ class GamePage extends StatelessWidget {
                 zoom: 2.0, // Nosso zoom travado
                 moveOnlyMapArea: false,
               ),
-              map: WorldMapByTiled(WorldMapReader.fromAsset('map/map.json')),
+              map: WorldMapByTiled(
+                WorldMapReader.fromAsset('map/map.json'),
+                objectsBuilder: {
+                  // Certifique-se de que o nome no Tiled seja 'rat'
+                  'rat': (properties) =>
+                      RatEnemy(position: properties.position),
+                  'cyclops': (properties) =>
+                      CyclopsEnemy(position: properties.position),
+                  'troll': (properties) =>
+                      TrollEnemy(position: properties.position),
+                },
+              ),
             ),
           ),
 

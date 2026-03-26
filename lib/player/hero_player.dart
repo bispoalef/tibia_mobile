@@ -1,8 +1,9 @@
 import 'package:bonfire/bonfire.dart';
+import 'package:flutter/material.dart';
 import 'package:tibia_mobile/core/constants.dart';
 import 'package:tibia_mobile/player/hero_sprite.dart';
 
-class HeroPlayer extends SimplePlayer with BlockMovementCollision {
+class HeroPlayer extends SimplePlayer with BlockMovementCollision, UseLifeBar {
   Vector2? _targetPosition;
   JoystickMoveDirectional _joystickDirection = JoystickMoveDirectional.IDLE;
   JoystickMoveDirectional _movingDirection = JoystickMoveDirectional.IDLE;
@@ -20,6 +21,17 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision {
 
   @override
   Future<void> onLoad() {
+    setupLifeBar(
+      size: Vector2(kTileSize, 4),
+      // O segredo está no nome da Enum: BarLifeDrawPosition
+      barLifeDrawPosition: BarLifeDrawPosition.top,
+      borderRadius: BorderRadius.zero,
+      borderWidth: 1.5,
+      borderColor: Colors.black,
+      showLifeText: false,
+      colors: [Colors.red, Colors.yellow, Colors.green],
+    );
+
     add(
       RectangleHitbox(
         size: Vector2(kTileSize - 4, kTileSize - 4),
@@ -54,6 +66,31 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision {
   @override
   void onJoystickChangeDirectional(JoystickDirectionalEvent event) {
     _joystickDirection = event.directional;
+  }
+
+  @override
+  void onJoystickAction(JoystickActionEvent event) {
+    if (event.id == 1 && event.event == ActionEvent.DOWN) {
+      _attack();
+    }
+    super.onJoystickAction(event);
+  }
+
+  @override
+  void onReceiveDamage(
+    AttackOriginEnum attacker,
+    double damage,
+    dynamic identify,
+  ) {
+    showDamage(
+      damage,
+      config: const TextStyle(
+        color: Colors.red,
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+    super.onReceiveDamage(attacker, damage, identify);
   }
 
   @override
@@ -203,5 +240,10 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision {
       default:
         break;
     }
+  }
+
+  void _attack() {
+    // Ataque corpo a corpo básico
+    simpleAttackMelee(damage: 5, size: Vector2(kTileSize, kTileSize));
   }
 }
