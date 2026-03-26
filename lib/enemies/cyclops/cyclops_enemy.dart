@@ -10,17 +10,12 @@ class CyclopsEnemy extends SimpleEnemy with BlockMovementCollision, UseLifeBar {
   double _idleTimer = 0;
 
   CyclopsEnemy({required super.position})
-    : super(
-        size: Vector2(64, 64), // MUITO IMPORTANTE: Tamanho real dele
-        speed: 30,
-        life: 100,
-      ) {
+    : super(size: Vector2(64, 64), speed: 30, life: 100) {
     CyclopsSprite.animation.then((anim) => animation = anim);
   }
 
   @override
   Future<void> onLoad() {
-    // Barra de vida "seca" estilo Tibia
     setupLifeBar(
       size: Vector2(kTileSize, 4),
       barLifeDrawPosition: BarLifeDrawPosition.top,
@@ -59,7 +54,6 @@ class CyclopsEnemy extends SimpleEnemy with BlockMovementCollision, UseLifeBar {
     super.update(dt);
   }
 
-  // --- MOVIMENTAÇÃO EM GRID (IDÊNTICO AO TIBIA) ---
   void _runTibiaStyleRandomMove(double dt) {
     if (_targetPosition != null) {
       double distance = position.distanceTo(_targetPosition!);
@@ -80,10 +74,9 @@ class CyclopsEnemy extends SimpleEnemy with BlockMovementCollision, UseLifeBar {
   }
 
   void _startRandomStep() {
-    final dir = Random().nextInt(5); // 0 a 4
+    final dir = Random().nextInt(5);
     if (dir == 0) return;
 
-    // Mapeia o Random para as direções básicas do Joystick
     _movingDirection = [
       JoystickMoveDirectional.IDLE,
       JoystickMoveDirectional.MOVE_UP,

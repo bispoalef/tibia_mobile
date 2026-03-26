@@ -14,9 +14,7 @@ class GamePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(
-        // <-- O Row é o que divide a tela na horizontal!
         children: [
-          // O Expanded faz o jogo ocupar todo o espaço restante da tela
           Expanded(
             child: BonfireWidget(
               showCollisionArea: true,
@@ -26,7 +24,7 @@ class GamePage extends StatelessWidget {
                   directional: JoystickDirectional(),
                   actions: [
                     JoystickAction(
-                      actionId: 1, // ID do botão de ataque
+                      actionId: 1,
                       margin: const EdgeInsets.all(40),
                       color: Colors.red.withOpacity(0.5),
                     ),
@@ -36,14 +34,10 @@ class GamePage extends StatelessWidget {
               player: HeroPlayer(
                 position: Vector2(kTileSize * 4, kTileSize * 4),
               ),
-              cameraConfig: CameraConfig(
-                zoom: 2.0, // Nosso zoom travado
-                moveOnlyMapArea: false,
-              ),
+              cameraConfig: CameraConfig(zoom: 2.0, moveOnlyMapArea: false),
               map: WorldMapByTiled(
                 WorldMapReader.fromAsset('map/map.json'),
                 objectsBuilder: {
-                  // Certifique-se de que o nome no Tiled seja 'rat'
                   'rat': (properties) =>
                       RatEnemy(position: properties.position),
                   'cyclops': (properties) =>
@@ -55,7 +49,6 @@ class GamePage extends StatelessWidget {
             ),
           ),
 
-          // A nossa interface lateral!
           const TibiaUI(),
         ],
       ),

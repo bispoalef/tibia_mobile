@@ -23,7 +23,7 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision, UseLifeBar {
   Future<void> onLoad() {
     setupLifeBar(
       size: Vector2(kTileSize, 4),
-      // O segredo está no nome da Enum: BarLifeDrawPosition
+
       barLifeDrawPosition: BarLifeDrawPosition.top,
       borderRadius: BorderRadius.zero,
       borderWidth: 1.5,
@@ -50,11 +50,9 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision, UseLifeBar {
   void onBlockedMovement(PositionComponent other, CollisionData collisionData) {
     if (_targetPosition != null) {
       _targetPosition = null;
-      // É CRÍTICO chamar o stopMove() aqui para zerar a velocidade do Bonfire
-      // Isso evita que o personagem tente "deslizar" pela borda.
+
       stopMove();
 
-      // Snap para o grid
       position = Vector2(
         (position.x / kTileSize).round() * kTileSize,
         (position.y / kTileSize).round() * kTileSize,
@@ -101,13 +99,11 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision, UseLifeBar {
       _checkNewMove();
     }
 
-    // Gerenciamento de animação quando parado ou bloqueado
     if (_joystickDirection != JoystickMoveDirectional.IDLE) {
       if (_targetPosition == null) {
         _forceAnimationWhileBlocked();
       }
     } else if (_targetPosition == null) {
-      // Se soltou o joystick e não tem alvo, garante que pare de vez
       stopMove();
     }
 
@@ -119,7 +115,6 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision, UseLifeBar {
       _movingDirection = _joystickDirection;
       _targetPosition = _calculateTargetTile(_joystickDirection);
     } else {
-      // Se não houver direção no joystick e nenhum alvo, paramos a animação.
       if (_targetPosition == null) {
         stopMove();
       }
@@ -170,7 +165,7 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision, UseLifeBar {
     if (distanceToTarget <= stepDistance) {
       position = _targetPosition!;
       _targetPosition = null;
-      // Só chamamos o stopMove() se o joystick também estiver parado
+
       if (_joystickDirection == JoystickMoveDirectional.IDLE) {
         stopMove();
       }
@@ -211,7 +206,6 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision, UseLifeBar {
   }
 
   void _forceAnimationWhileBlocked() {
-    // idle() ou play() baseado na direção para garantir que não deslize
     switch (_joystickDirection) {
       case JoystickMoveDirectional.MOVE_UP:
         animation?.play(SimpleAnimationEnum.runUp);
@@ -243,7 +237,6 @@ class HeroPlayer extends SimplePlayer with BlockMovementCollision, UseLifeBar {
   }
 
   void _attack() {
-    // Ataque corpo a corpo básico
     simpleAttackMelee(damage: 5, size: Vector2(kTileSize, kTileSize));
   }
 }
